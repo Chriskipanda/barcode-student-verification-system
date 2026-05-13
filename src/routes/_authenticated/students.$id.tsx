@@ -6,10 +6,12 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Trash2, Upload, IdCard } from "lucide-react";
 import { toast } from "sonner";
+import { downloadIdCard } from "@/lib/idcard";
 
 export const Route = createFileRoute("/_authenticated/students/$id")({
   component: StudentEditor,
@@ -39,6 +41,10 @@ function StudentEditor() {
     year_of_study: 1,
     status: "active" as "active" | "suspended" | "graduated",
     notes: "",
+    expires_at: "",
+    is_visitor: false,
+    parent_email: "",
+    parent_phone: "",
   });
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -56,6 +62,10 @@ function StudentEditor() {
         year_of_study: student.year_of_study ?? 1,
         status: student.status,
         notes: student.notes ?? "",
+        expires_at: student.expires_at ?? "",
+        is_visitor: student.is_visitor ?? false,
+        parent_email: student.parent_email ?? "",
+        parent_phone: student.parent_phone ?? "",
       });
       setPhotoUrl(student.photo_url ?? null);
       if (student.photo_url) {
@@ -89,7 +99,14 @@ function StudentEditor() {
   const save = async () => {
     setSaving(true);
     try {
-      const payload = { ...form, photo_url: photoUrl, year_of_study: Number(form.year_of_study) };
+      const payload = {
+        ...form,
+        photo_url: photoUrl,
+        year_of_study: Number(form.year_of_study),
+        expires_at: form.expires_at || null,
+        parent_email: form.parent_email || null,
+        parent_phone: form.parent_phone || null,
+      };
       if (isNew) {
         const { data, error } = await supabase.from("students").insert(payload).select().single();
         if (error) throw error;
@@ -116,15 +133,33 @@ function StudentEditor() {
     navigate({ to: "/students" });
   };
 
+  const printIdCard = async () => {
+    let photoDataUrl: string | null = null;
+    if (photoPreview) {
+      try {
+        const blob = await (await fetch(photoPreview)).blob();
+        photoDataUrl = await new Promise<string>((res) => { const r = new FileReader(); r.onload = () => res(r.result as string); r.readAsDataURL(blob); });
+      } catch {}
+    }
+    downloadIdCard({
+      full_name: form.full_name, admission_number: form.admission_number, barcode: form.barcode,
+      programme: form.programme, nta_level: form.nta_level, year_of_study: form.year_of_study,
+      photoDataUrl, is_visitor: form.is_visitor, expires_at: form.expires_at || null,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Link to="/students" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Back to students
       </Link>
 
-      <div>
-        <h1 className="text-2xl font-bold">{isNew ? "New student" : form.full_name || "Edit student"}</h1>
-        <p className="text-sm text-muted-foreground">All fields except notes are required.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">{isNew ? "New student" : form.full_name || "Edit student"}</h1>
+          <p className="text-sm text-muted-foreground">All fields except notes are required.</p>
+        </div>
+        {!isNew && <Button variant="outline" onClick={printIdCard}><IdCard className="mr-2 h-4 w-4" /> Download ID card</Button>}
       </div>
 
       <div className="grid gap-6 md:grid-cols-[280px_1fr]">
@@ -139,22 +174,14 @@ function StudentEditor() {
           <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border bg-card px-3 py-2 text-sm hover:bg-secondary">
             <Upload className="h-4 w-4" />
             {uploading ? "Uploading…" : "Upload photo"}
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => e.target.files?.[0] && handlePhoto(e.target.files[0])}
-              disabled={uploading}
-            />
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handlePhoto(e.target.files[0])} disabled={uploading} />
           </label>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Admission number" value={form.admission_number} onChange={(v) => setForm((f) => ({ ...f, admission_number: v }))} />
           <Field label="Barcode" value={form.barcode} onChange={(v) => setForm((f) => ({ ...f, barcode: v }))} />
-          <div className="sm:col-span-2">
-            <Field label="Full name" value={form.full_name} onChange={(v) => setForm((f) => ({ ...f, full_name: v }))} />
-          </div>
+          <div className="sm:col-span-2"><Field label="Full name" value={form.full_name} onChange={(v) => setForm((f) => ({ ...f, full_name: v }))} /></div>
           <Field label="Programme" value={form.programme} onChange={(v) => setForm((f) => ({ ...f, programme: v }))} />
           <Field label="NTA level" value={form.nta_level} onChange={(v) => setForm((f) => ({ ...f, nta_level: v }))} />
           <div className="space-y-1.5">
@@ -172,6 +199,16 @@ function StudentEditor() {
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-1.5">
+            <Label>Expires at (optional)</Label>
+            <Input type="date" value={form.expires_at} onChange={(e) => setForm((f) => ({ ...f, expires_at: e.target.value }))} />
+          </div>
+          <div className="flex items-end justify-between space-y-1.5">
+            <div><Label>Visitor pass</Label><p className="text-xs text-muted-foreground">Mark as temporary</p></div>
+            <Switch checked={form.is_visitor} onCheckedChange={(v) => setForm((f) => ({ ...f, is_visitor: v }))} />
+          </div>
+          <Field label="Parent email" value={form.parent_email} onChange={(v) => setForm((f) => ({ ...f, parent_email: v }))} />
+          <Field label="Parent phone" value={form.parent_phone} onChange={(v) => setForm((f) => ({ ...f, parent_phone: v }))} />
           <div className="sm:col-span-2 space-y-1.5">
             <Label>Notes</Label>
             <Textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} rows={3} />
