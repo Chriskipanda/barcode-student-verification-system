@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, Navigate, useRouter } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
-import { ShieldCheck, ScanLine, Users, ClipboardList, Settings, LogOut, UserCog, LayoutDashboard } from "lucide-react";
+import { ShieldCheck, ScanLine, Users, ClipboardList, Settings, LogOut, UserCog, LayoutDashboard, DoorOpen, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -20,6 +20,8 @@ function AuthenticatedLayout() {
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, adminOnly: true },
     { to: "/verify", label: "Gate Scan", icon: ScanLine, adminOnly: false },
     { to: "/students", label: "Students", icon: Users, adminOnly: true },
+    { to: "/visitors", label: "Visitor Pass", icon: UserPlus, adminOnly: true },
+    { to: "/gates", label: "Gates", icon: DoorOpen, adminOnly: true },
     { to: "/logs", label: "Access Logs", icon: ClipboardList, adminOnly: false },
     { to: "/users", label: "Users", icon: UserCog, adminOnly: true },
     { to: "/settings", label: "Settings", icon: Settings, adminOnly: true },
