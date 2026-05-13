@@ -35,7 +35,8 @@ function Dashboard() {
       const buckets = Array.from({ length: 24 }, (_, h) => ({ hour: `${h}:00`, allowed: 0, denied: 0, unknown: 0 }));
       (data ?? []).forEach((l: any) => {
         const h = new Date(l.scanned_at).getHours();
-        buckets[h][l.decision as keyof typeof buckets[number]] = (buckets[h][l.decision as keyof typeof buckets[number]] as number) + 1;
+        const k = l.decision as "allowed" | "denied" | "unknown";
+        if (k in buckets[h]) (buckets[h] as any)[k]++;
       });
       return buckets;
     },
