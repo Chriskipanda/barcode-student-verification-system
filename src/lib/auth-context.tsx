@@ -19,35 +19,63 @@ interface AuthState {
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser]       = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [roles, setRoles] = useState<AppRole[]>([]);
+  const [roles, setRoles]     = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadRoles = async (userId: string) => {
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
     setRoles((data ?? []).map((r) => r.role as AppRole));
   };
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      if (sess?.user) {
-        setTimeout(() => loadRoles(sess.user.id), 0);
-      } else {
-        setRoles([]);
+    let mounted = true;
+
+    // ── Ongoing auth events (sign-in, sign-out, token refresh) ────────────
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, sess) => {
+      if (!mounted) return;
+
+      if (event === "SIGNED_IN") {
+        // Re-enter loading state so routing decisions wait for roles
+        setLoading(true);
+        setSession(sess);
+        setUser(sess?.user ?? null);
+        if (sess?.user) await loadRoles(sess.user.id);
+        if (mounted) setLoading(false);
+        return;
       }
-    });
 
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
+      if (event === "SIGNED_OUT") {
+        setSession(null);
+        setUser(null);
+        setRoles([]);
+        return;
+      }
+
+      // TOKEN_REFRESHED, USER_UPDATED — keep session in sync silently
       setSession(sess);
       setUser(sess?.user ?? null);
-      if (sess?.user) loadRoles(sess.user.id);
-      setLoading(false);
     });
 
-    return () => sub.subscription.unsubscribe();
+    // ── Initial session (page load / refresh) ─────────────────────────────
+    // We await roles before clearing loading so index.tsx sees the correct
+    // isAdmin value on first render and never mis-routes to /verify.
+    supabase.auth.getSession().then(async ({ data: { session: sess } }) => {
+      if (!mounted) return;
+      setSession(sess);
+      setUser(sess?.user ?? null);
+      if (sess?.user) await loadRoles(sess.user.id);
+      if (mounted) setLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

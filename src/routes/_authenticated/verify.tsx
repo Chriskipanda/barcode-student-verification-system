@@ -45,6 +45,8 @@ function VerifyPage() {
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
   const cameraControlsRef = useRef<{ stop: () => void } | null>(null);
   const lastScanRef = useRef<{ code: string; at: number } | null>(null);
+  // Stable ref for verify so camera effect doesn't restart when settings change
+  const verifyRef = useRef<(raw: string) => Promise<void>>(async () => {});
 
   const { data: gates } = useQuery({
     queryKey: ["active-gates"],
@@ -184,7 +186,10 @@ function VerifyPage() {
     }
   }, [online, user?.id, direction, gateId, antiPassbackSec]);
 
-  // Camera scanning
+  // Keep ref in sync with latest verify — no deps change required on camera effect
+  useEffect(() => { verifyRef.current = verify; }, [verify]);
+
+  // Camera scanning — depends ONLY on cameraOn, uses verifyRef to avoid restarts
   useEffect(() => {
     if (!cameraOn) {
       cameraControlsRef.current?.stop();
@@ -197,7 +202,7 @@ function VerifyPage() {
       try {
         const controls = await readerRef.current.decodeFromVideoDevice(undefined, videoRef.current!, (res) => {
           if (cancelled) return;
-          if (res) verify(res.getText());
+          if (res) verifyRef.current(res.getText());
         });
         cameraControlsRef.current = controls;
       } catch (e: any) {
@@ -206,7 +211,7 @@ function VerifyPage() {
       }
     })();
     return () => { cancelled = true; cameraControlsRef.current?.stop(); cameraControlsRef.current = null; };
-  }, [cameraOn, verify]);
+  }, [cameraOn]); // ← no longer depends on verify
 
   const onSubmit = (e: React.FormEvent) => { e.preventDefault(); verify(code); };
 
