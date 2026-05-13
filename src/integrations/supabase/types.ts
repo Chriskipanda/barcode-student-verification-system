@@ -17,6 +17,8 @@ export type Database = {
       access_logs: {
         Row: {
           decision: Database["public"]["Enums"]["access_decision"]
+          direction: Database["public"]["Enums"]["scan_direction"] | null
+          gate_id: string | null
           id: string
           reason: string | null
           scanned_at: string
@@ -26,6 +28,8 @@ export type Database = {
         }
         Insert: {
           decision: Database["public"]["Enums"]["access_decision"]
+          direction?: Database["public"]["Enums"]["scan_direction"] | null
+          gate_id?: string | null
           id?: string
           reason?: string | null
           scanned_at?: string
@@ -35,6 +39,8 @@ export type Database = {
         }
         Update: {
           decision?: Database["public"]["Enums"]["access_decision"]
+          direction?: Database["public"]["Enums"]["scan_direction"] | null
+          gate_id?: string | null
           id?: string
           reason?: string | null
           scanned_at?: string
@@ -44,8 +50,96 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "access_logs_gate_id_fkey"
+            columns: ["gate_id"]
+            isOneToOne: false
+            referencedRelation: "gates"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "access_logs_student_id_fkey"
             columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gates: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          location: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          channel: string
+          created_at: string
+          error: string | null
+          id: string
+          kind: string
+          recipient: string
+          related_log_id: string | null
+          related_student_id: string | null
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          body?: string | null
+          channel: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          kind: string
+          recipient: string
+          related_log_id?: string | null
+          related_student_id?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          body?: string | null
+          channel?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          kind?: string
+          recipient?: string
+          related_log_id?: string | null
+          related_student_id?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_related_log_id_fkey"
+            columns: ["related_log_id"]
+            isOneToOne: false
+            referencedRelation: "access_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_related_student_id_fkey"
+            columns: ["related_student_id"]
             isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
@@ -105,10 +199,14 @@ export type Database = {
           admission_number: string
           barcode: string
           created_at: string
+          expires_at: string | null
           full_name: string
           id: string
+          is_visitor: boolean
           notes: string | null
           nta_level: string
+          parent_email: string | null
+          parent_phone: string | null
           photo_url: string | null
           programme: string
           status: Database["public"]["Enums"]["student_status"]
@@ -119,10 +217,14 @@ export type Database = {
           admission_number: string
           barcode: string
           created_at?: string
+          expires_at?: string | null
           full_name: string
           id?: string
+          is_visitor?: boolean
           notes?: string | null
           nta_level?: string
+          parent_email?: string | null
+          parent_phone?: string | null
           photo_url?: string | null
           programme?: string
           status?: Database["public"]["Enums"]["student_status"]
@@ -133,10 +235,14 @@ export type Database = {
           admission_number?: string
           barcode?: string
           created_at?: string
+          expires_at?: string | null
           full_name?: string
           id?: string
+          is_visitor?: boolean
           notes?: string | null
           nta_level?: string
+          parent_email?: string | null
+          parent_phone?: string | null
           photo_url?: string | null
           programme?: string
           status?: Database["public"]["Enums"]["student_status"]
@@ -182,6 +288,7 @@ export type Database = {
     Enums: {
       access_decision: "allowed" | "denied" | "unknown"
       app_role: "admin" | "gate"
+      scan_direction: "in" | "out"
       student_status: "active" | "suspended" | "graduated"
     }
     CompositeTypes: {
@@ -312,6 +419,7 @@ export const Constants = {
     Enums: {
       access_decision: ["allowed", "denied", "unknown"],
       app_role: ["admin", "gate"],
+      scan_direction: ["in", "out"],
       student_status: ["active", "suspended", "graduated"],
     },
   },
