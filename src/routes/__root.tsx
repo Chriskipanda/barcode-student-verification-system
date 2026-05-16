@@ -1,3 +1,4 @@
+import "@/lib/i18n"; // must be first — initialises i18next before any component renders
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,

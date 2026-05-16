@@ -14,6 +14,8 @@ export interface CachedStudent {
   is_visitor: boolean;
   parent_email: string | null;
   parent_phone: string | null;
+  suspension_reason: string | null;
+  suspended_until: string | null;
 }
 
 export interface QueuedScan {

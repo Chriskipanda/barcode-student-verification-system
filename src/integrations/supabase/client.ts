@@ -18,7 +18,20 @@ function createSupabaseClient() {
     throw new Error(message);
   }
 
-  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  // In dev mode, when accessed from a LAN device (e.g. a phone at 192.168.x.x),
+  // the browser cannot reach Supabase's cloud directly if the WiFi has no internet.
+  // Route through the Vite dev server proxy so all traffic flows via this machine.
+  const isLanAccess =
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1';
+
+  const effectiveUrl = isLanAccess
+    ? `${window.location.origin}/supabase-proxy`
+    : SUPABASE_URL;
+
+  return createClient<Database>(effectiveUrl, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       storage: typeof window !== 'undefined' ? localStorage : undefined,
       persistSession: true,

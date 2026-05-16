@@ -10,22 +10,36 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CheckRouteImport } from './routes/check'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedWatchlistRouteImport } from './routes/_authenticated/watchlist'
 import { Route as AuthenticatedVisitorsRouteImport } from './routes/_authenticated/visitors'
 import { Route as AuthenticatedVerifyRouteImport } from './routes/_authenticated/verify'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedStudentsRouteImport } from './routes/_authenticated/students'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedMyShiftRouteImport } from './routes/_authenticated/my-shift'
 import { Route as AuthenticatedLogsRouteImport } from './routes/_authenticated/logs'
+import { Route as AuthenticatedInsideRouteImport } from './routes/_authenticated/inside'
+import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedGatesRouteImport } from './routes/_authenticated/gates'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedStudentsNewRouteImport } from './routes/_authenticated/students.new'
+import { Route as AuthenticatedAppointmentsRouteImport } from './routes/_authenticated/appointments'
+import { Route as AuthenticatedAnnouncementsRouteImport } from './routes/_authenticated/announcements'
+import { Route as AuthenticatedStudentsIndexRouteImport } from './routes/_authenticated/students.index'
 import { Route as AuthenticatedStudentsIdRouteImport } from './routes/_authenticated/students.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckRoute = CheckRouteImport.update({
+  id: '/check',
+  path: '/check',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -36,6 +50,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedWatchlistRoute = AuthenticatedWatchlistRouteImport.update({
+  id: '/watchlist',
+  path: '/watchlist',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedVisitorsRoute = AuthenticatedVisitorsRouteImport.update({
   id: '/visitors',
@@ -62,9 +81,35 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMyShiftRoute = AuthenticatedMyShiftRouteImport.update({
+  id: '/my-shift',
+  path: '/my-shift',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedLogsRoute = AuthenticatedLogsRouteImport.update({
   id: '/logs',
   path: '/logs',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedInsideRoute = AuthenticatedInsideRouteImport.update({
+  id: '/inside',
+  path: '/inside',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedIncidentsRoute = AuthenticatedIncidentsRouteImport.update({
+  id: '/incidents',
+  path: '/incidents',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedGatesRoute = AuthenticatedGatesRouteImport.update({
@@ -77,10 +122,22 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedStudentsNewRoute =
-  AuthenticatedStudentsNewRouteImport.update({
-    id: '/new',
-    path: '/new',
+const AuthenticatedAppointmentsRoute =
+  AuthenticatedAppointmentsRouteImport.update({
+    id: '/appointments',
+    path: '/appointments',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAnnouncementsRoute =
+  AuthenticatedAnnouncementsRouteImport.update({
+    id: '/announcements',
+    path: '/announcements',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedStudentsIndexRoute =
+  AuthenticatedStudentsIndexRouteImport.update({
+    id: '/',
+    path: '/',
     getParentRoute: () => AuthenticatedStudentsRoute,
   } as any)
 const AuthenticatedStudentsIdRoute = AuthenticatedStudentsIdRouteImport.update({
@@ -91,97 +148,150 @@ const AuthenticatedStudentsIdRoute = AuthenticatedStudentsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/check': typeof CheckRoute
   '/login': typeof LoginRoute
+  '/announcements': typeof AuthenticatedAnnouncementsRoute
+  '/appointments': typeof AuthenticatedAppointmentsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/gates': typeof AuthenticatedGatesRoute
+  '/incidents': typeof AuthenticatedIncidentsRoute
+  '/inside': typeof AuthenticatedInsideRoute
   '/logs': typeof AuthenticatedLogsRoute
+  '/my-shift': typeof AuthenticatedMyShiftRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/students': typeof AuthenticatedStudentsRouteWithChildren
   '/users': typeof AuthenticatedUsersRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/visitors': typeof AuthenticatedVisitorsRoute
+  '/watchlist': typeof AuthenticatedWatchlistRoute
   '/students/$id': typeof AuthenticatedStudentsIdRoute
-  '/students/new': typeof AuthenticatedStudentsNewRoute
+  '/students/': typeof AuthenticatedStudentsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/check': typeof CheckRoute
   '/login': typeof LoginRoute
+  '/announcements': typeof AuthenticatedAnnouncementsRoute
+  '/appointments': typeof AuthenticatedAppointmentsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/gates': typeof AuthenticatedGatesRoute
+  '/incidents': typeof AuthenticatedIncidentsRoute
+  '/inside': typeof AuthenticatedInsideRoute
   '/logs': typeof AuthenticatedLogsRoute
+  '/my-shift': typeof AuthenticatedMyShiftRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/students': typeof AuthenticatedStudentsRouteWithChildren
   '/users': typeof AuthenticatedUsersRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/visitors': typeof AuthenticatedVisitorsRoute
+  '/watchlist': typeof AuthenticatedWatchlistRoute
   '/students/$id': typeof AuthenticatedStudentsIdRoute
-  '/students/new': typeof AuthenticatedStudentsNewRoute
+  '/students': typeof AuthenticatedStudentsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/check': typeof CheckRoute
   '/login': typeof LoginRoute
+  '/_authenticated/announcements': typeof AuthenticatedAnnouncementsRoute
+  '/_authenticated/appointments': typeof AuthenticatedAppointmentsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/gates': typeof AuthenticatedGatesRoute
+  '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
+  '/_authenticated/inside': typeof AuthenticatedInsideRoute
   '/_authenticated/logs': typeof AuthenticatedLogsRoute
+  '/_authenticated/my-shift': typeof AuthenticatedMyShiftRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/students': typeof AuthenticatedStudentsRouteWithChildren
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
   '/_authenticated/visitors': typeof AuthenticatedVisitorsRoute
+  '/_authenticated/watchlist': typeof AuthenticatedWatchlistRoute
   '/_authenticated/students/$id': typeof AuthenticatedStudentsIdRoute
-  '/_authenticated/students/new': typeof AuthenticatedStudentsNewRoute
+  '/_authenticated/students/': typeof AuthenticatedStudentsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/check'
     | '/login'
+    | '/announcements'
+    | '/appointments'
     | '/dashboard'
     | '/gates'
+    | '/incidents'
+    | '/inside'
     | '/logs'
+    | '/my-shift'
+    | '/notifications'
+    | '/reports'
     | '/settings'
     | '/students'
     | '/users'
     | '/verify'
     | '/visitors'
+    | '/watchlist'
     | '/students/$id'
-    | '/students/new'
+    | '/students/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/check'
     | '/login'
+    | '/announcements'
+    | '/appointments'
     | '/dashboard'
     | '/gates'
+    | '/incidents'
+    | '/inside'
     | '/logs'
+    | '/my-shift'
+    | '/notifications'
+    | '/reports'
     | '/settings'
-    | '/students'
     | '/users'
     | '/verify'
     | '/visitors'
+    | '/watchlist'
     | '/students/$id'
-    | '/students/new'
+    | '/students'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/check'
     | '/login'
+    | '/_authenticated/announcements'
+    | '/_authenticated/appointments'
     | '/_authenticated/dashboard'
     | '/_authenticated/gates'
+    | '/_authenticated/incidents'
+    | '/_authenticated/inside'
     | '/_authenticated/logs'
+    | '/_authenticated/my-shift'
+    | '/_authenticated/notifications'
+    | '/_authenticated/reports'
     | '/_authenticated/settings'
     | '/_authenticated/students'
     | '/_authenticated/users'
     | '/_authenticated/verify'
     | '/_authenticated/visitors'
+    | '/_authenticated/watchlist'
     | '/_authenticated/students/$id'
-    | '/_authenticated/students/new'
+    | '/_authenticated/students/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  CheckRoute: typeof CheckRoute
   LoginRoute: typeof LoginRoute
 }
 
@@ -192,6 +302,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check': {
+      id: '/check'
+      path: '/check'
+      fullPath: '/check'
+      preLoaderRoute: typeof CheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -207,6 +324,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/watchlist': {
+      id: '/_authenticated/watchlist'
+      path: '/watchlist'
+      fullPath: '/watchlist'
+      preLoaderRoute: typeof AuthenticatedWatchlistRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/visitors': {
       id: '/_authenticated/visitors'
@@ -243,11 +367,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/my-shift': {
+      id: '/_authenticated/my-shift'
+      path: '/my-shift'
+      fullPath: '/my-shift'
+      preLoaderRoute: typeof AuthenticatedMyShiftRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/logs': {
       id: '/_authenticated/logs'
       path: '/logs'
       fullPath: '/logs'
       preLoaderRoute: typeof AuthenticatedLogsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/inside': {
+      id: '/_authenticated/inside'
+      path: '/inside'
+      fullPath: '/inside'
+      preLoaderRoute: typeof AuthenticatedInsideRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/incidents': {
+      id: '/_authenticated/incidents'
+      path: '/incidents'
+      fullPath: '/incidents'
+      preLoaderRoute: typeof AuthenticatedIncidentsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/gates': {
@@ -264,11 +423,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/students/new': {
-      id: '/_authenticated/students/new'
-      path: '/new'
-      fullPath: '/students/new'
-      preLoaderRoute: typeof AuthenticatedStudentsNewRouteImport
+    '/_authenticated/appointments': {
+      id: '/_authenticated/appointments'
+      path: '/appointments'
+      fullPath: '/appointments'
+      preLoaderRoute: typeof AuthenticatedAppointmentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/announcements': {
+      id: '/_authenticated/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AuthenticatedAnnouncementsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/students/': {
+      id: '/_authenticated/students/'
+      path: '/'
+      fullPath: '/students/'
+      preLoaderRoute: typeof AuthenticatedStudentsIndexRouteImport
       parentRoute: typeof AuthenticatedStudentsRoute
     }
     '/_authenticated/students/$id': {
@@ -283,12 +456,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedStudentsRouteChildren {
   AuthenticatedStudentsIdRoute: typeof AuthenticatedStudentsIdRoute
-  AuthenticatedStudentsNewRoute: typeof AuthenticatedStudentsNewRoute
+  AuthenticatedStudentsIndexRoute: typeof AuthenticatedStudentsIndexRoute
 }
 
 const AuthenticatedStudentsRouteChildren: AuthenticatedStudentsRouteChildren = {
   AuthenticatedStudentsIdRoute: AuthenticatedStudentsIdRoute,
-  AuthenticatedStudentsNewRoute: AuthenticatedStudentsNewRoute,
+  AuthenticatedStudentsIndexRoute: AuthenticatedStudentsIndexRoute,
 }
 
 const AuthenticatedStudentsRouteWithChildren =
@@ -297,25 +470,41 @@ const AuthenticatedStudentsRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAnnouncementsRoute: typeof AuthenticatedAnnouncementsRoute
+  AuthenticatedAppointmentsRoute: typeof AuthenticatedAppointmentsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedGatesRoute: typeof AuthenticatedGatesRoute
+  AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
+  AuthenticatedInsideRoute: typeof AuthenticatedInsideRoute
   AuthenticatedLogsRoute: typeof AuthenticatedLogsRoute
+  AuthenticatedMyShiftRoute: typeof AuthenticatedMyShiftRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStudentsRoute: typeof AuthenticatedStudentsRouteWithChildren
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedVerifyRoute: typeof AuthenticatedVerifyRoute
   AuthenticatedVisitorsRoute: typeof AuthenticatedVisitorsRoute
+  AuthenticatedWatchlistRoute: typeof AuthenticatedWatchlistRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAnnouncementsRoute: AuthenticatedAnnouncementsRoute,
+  AuthenticatedAppointmentsRoute: AuthenticatedAppointmentsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedGatesRoute: AuthenticatedGatesRoute,
+  AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
+  AuthenticatedInsideRoute: AuthenticatedInsideRoute,
   AuthenticatedLogsRoute: AuthenticatedLogsRoute,
+  AuthenticatedMyShiftRoute: AuthenticatedMyShiftRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStudentsRoute: AuthenticatedStudentsRouteWithChildren,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedVerifyRoute: AuthenticatedVerifyRoute,
   AuthenticatedVisitorsRoute: AuthenticatedVisitorsRoute,
+  AuthenticatedWatchlistRoute: AuthenticatedWatchlistRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -325,6 +514,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  CheckRoute: CheckRoute,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport

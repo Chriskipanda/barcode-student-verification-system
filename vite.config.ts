@@ -12,4 +12,19 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      // Proxy Supabase API requests through the dev server so that mobile devices
+      // on the LAN (which may not have direct internet access) can still reach
+      // Supabase by routing through this machine.
+      proxy: {
+        "/supabase-proxy": {
+          target: "https://hbqvqlshqkqomhtqibpq.supabase.co",
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path.replace(/^\/supabase-proxy/, ""),
+        },
+      },
+    },
+  },
 });
