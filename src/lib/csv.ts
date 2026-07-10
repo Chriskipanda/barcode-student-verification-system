@@ -21,3 +21,12 @@ export function parseCSV<T = Record<string, string>>(file: File): Promise<T[]> {
     });
   });
 }
+
+/** Parse CSV/TSV supplied as a raw string (from paste or a fetched API response). */
+export function parseCSVText<T = Record<string, string>>(text: string): T[] {
+  const res = Papa.parse<T>(text.trim(), {
+    header: true,
+    skipEmptyLines: true,
+  });
+  return res.data;
+}

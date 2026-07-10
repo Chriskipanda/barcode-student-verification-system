@@ -12,8 +12,9 @@ import {
   FileSpreadsheet, CheckSquare, Square, GraduationCap, ShieldOff, X,
   Pencil, User as UserIcon,
 } from "lucide-react";
-import { downloadCSV, parseCSV } from "@/lib/csv";
+import { downloadCSV } from "@/lib/csv";
 import { downloadBulkIdCards, type IdCardStudent } from "@/lib/idcard";
+import BulkImportDialog from "@/components/BulkImportDialog";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 
@@ -25,9 +26,9 @@ function StudentsPage() {
   const { t } = useTranslation();
   const { isAdmin, loading } = useAuth();
   const [search, setSearch]               = useState("");
-  const csvInputRef   = useRef<HTMLInputElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy]                   = useState(false);
+  const [importOpen, setImportOpen]       = useState(false);
   const [selected, setSelected]           = useState<Set<string>>(new Set());
   const [bulkSuspendReason, setBulkSuspendReason] = useState("");
   const [bulkSuspendOpen,   setBulkSuspendOpen]   = useState(false);
@@ -77,41 +78,6 @@ function StudentsPage() {
       `students-${new Date().toISOString().slice(0, 10)}.csv`,
       students.map(({ id, photo_url, created_at, updated_at, ...rest }: any) => rest),
     );
-  };
-
-  // ── CSV import ──────────────────────────────────────────────────────────
-  const importCSV = async (file: File) => {
-    setBusy(true);
-    try {
-      const rows = await parseCSV<any>(file);
-      const payload = rows
-        .filter((r) => r.admission_number && r.barcode && r.full_name)
-        .map((r) => ({
-          admission_number: r.admission_number,
-          barcode:          r.barcode,
-          full_name:        r.full_name,
-          programme:        r.programme        || "",
-          nta_level:        r.nta_level        || "",
-          year_of_study:    Number(r.year_of_study) || 1,
-          status:           r.status           || "active",
-          is_visitor:       r.is_visitor === "true" || r.is_visitor === true,
-          expires_at:       r.expires_at       || null,
-          parent_email:     r.parent_email     || null,
-          parent_phone:     r.parent_phone     || null,
-          notes:            r.notes            || null,
-        }));
-      const { error, count } = await supabase
-        .from("students")
-        .upsert(payload, { onConflict: "admission_number", count: "exact" } as any);
-      if (error) throw error;
-      toast.success(t("stu.toast_imported", { count: count ?? payload.length }));
-      refetch();
-    } catch (e: any) {
-      toast.error(e.message || "Import failed");
-    } finally {
-      setBusy(false);
-      if (csvInputRef.current) csvInputRef.current.value = "";
-    }
   };
 
   // ── Bulk photo upload ───────────────────────────────────────────────────
@@ -292,13 +258,9 @@ function StudentsPage() {
           <Button variant="outline" size="sm" onClick={downloadTemplate} title="Download blank CSV template">
             <FileSpreadsheet className="mr-2 h-4 w-4" /> {t("stu.btn_template")}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => csvInputRef.current?.click()} disabled={busy}>
+          <Button variant="outline" size="sm" onClick={() => setImportOpen(true)} disabled={busy}>
             <Upload className="mr-2 h-4 w-4" /> {t("stu.btn_import")}
           </Button>
-          <input
-            ref={csvInputRef} type="file" accept=".csv" hidden
-            onChange={(e) => e.target.files?.[0] && importCSV(e.target.files[0])}
-          />
           <Button variant="outline" size="sm" onClick={exportCSV}>
             <Download className="mr-2 h-4 w-4" /> {t("stu.btn_export")}
           </Button>
@@ -512,6 +474,13 @@ function StudentsPage() {
       </div>
 
       <p className="text-xs text-muted-foreground">{t("stu.tip")}</p>
+
+      {/* Bulk import (CSV / JSON file · paste · API link) */}
+      <BulkImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImported={refetch}
+      />
     </div>
   );
 }
